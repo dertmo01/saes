@@ -212,6 +212,9 @@ loadstring(GetScript("Features/AutoAttack.lua"))()
 Loading.Update(48)
 loadstring(GetScript("Features/AFKSystem.lua"))()
 
+Loading.Update(49)
+loadstring(GetScript("Features/AutoTreadmill.lua"))()
+
 -- ✅ VIPTP (AFK Farm Only) — ជំនួស EggCheckPremium
 Loading.Update(50)
 loadstring(GetScript("Features/VIPTP.lua"))()

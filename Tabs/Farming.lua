@@ -376,10 +376,8 @@ TreadmillCheck.Font = Enum.Font.GothamBold
 TreadmillCheck.Visible = false
 TreadmillCheck.Parent = TreadmillButton
 
-local TreadmillEnabled = false
-
+-- UI helper (also called by feature callbacks below)
 local function SetTreadmillUI(state)
-    TreadmillEnabled = state
     TreadmillCheck.Visible = state
     if state then
         TreadmillButton.BackgroundColor3 = Color3.fromRGB(105, 90, 190)
@@ -391,20 +389,29 @@ local function SetTreadmillUI(state)
 end
 
 TreadmillButton.MouseButton1Click:Connect(function()
-    if not _G.YOKUDO_AFKSystem then
-        warn("[YOKUDO] AFKSystem not loaded!")
+    if not _G.YOKUDO_AutoTreadmill then
+        warn("[YOKUDO] AutoTreadmill not loaded!")
         return
     end
 
-    TreadmillEnabled = not TreadmillEnabled
-    SetTreadmillUI(TreadmillEnabled)
+    local newState = not _G.YOKUDO_AutoTreadmill.IsEnabled()
+    SetTreadmillUI(newState)
 
-    if TreadmillEnabled then
-        _G.YOKUDO_AFKSystem.Enable()
+    if newState then
+        _G.YOKUDO_AutoTreadmill.Enable()
     else
-        _G.YOKUDO_AFKSystem.Disable()
+        _G.YOKUDO_AutoTreadmill.Disable()
     end
 end)
+
+-- Feature callbacks: keep UI in sync when watcher auto-pauses/restores
+_G.YOKUDO_AutoTreadmill_OnPause = function()
+    SetTreadmillUI(false)
+end
+
+_G.YOKUDO_AutoTreadmill_OnRestore = function()
+    SetTreadmillUI(true)
+end
 
 -- ==================================================
 -- FEATURE: DISABLE TREADMILL WHEN FARMING
@@ -466,49 +473,22 @@ DisableWhenFarmCheck.Font = Enum.Font.GothamBold
 DisableWhenFarmCheck.Visible = false
 DisableWhenFarmCheck.Parent = DisableWhenFarmButton
 
-local DisableWhenFarming = false
-
 DisableWhenFarmButton.MouseButton1Click:Connect(function()
-    DisableWhenFarming = not DisableWhenFarming
-    DisableWhenFarmCheck.Visible = DisableWhenFarming
-    if DisableWhenFarming then
+    if not _G.YOKUDO_AutoTreadmill then
+        warn("[YOKUDO] AutoTreadmill not loaded!")
+        return
+    end
+
+    local newState = not _G.YOKUDO_AutoTreadmill.GetDisableWhenFarming()
+    _G.YOKUDO_AutoTreadmill.SetDisableWhenFarming(newState)
+
+    DisableWhenFarmCheck.Visible = newState
+    if newState then
         DisableWhenFarmButton.BackgroundColor3 = Color3.fromRGB(105, 90, 190)
         DisableWhenFarmStroke.Color = Color3.fromRGB(135, 120, 225)
     else
         DisableWhenFarmButton.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
         DisableWhenFarmStroke.Color = Color3.fromRGB(200, 200, 220)
-    end
-end)
-
--- ==================================================
--- WATCHER: disable treadmill when farming starts,
--- restore it when farming stops
--- ==================================================
-task.spawn(function()
-    local wasFarming = false
-    while task.wait(0.5) do
-        if not _G.YOKUDO_FarmingManager or not _G.YOKUDO_AFKSystem then continue end
-
-        local isFarming = _G.YOKUDO_FarmingManager.IsEnabled()
-
-        if DisableWhenFarming then
-            if isFarming and not wasFarming then
-                -- Farming just started → stop treadmill if running
-                if _G.YOKUDO_AFKSystem.IsEnabled() then
-                    _G.YOKUDO_AFKSystem.Disable()
-                    SetTreadmillUI(false)
-                    print("[YOKUDO] Treadmill disabled (farming started)")
-                end
-            elseif not isFarming and wasFarming then
-                -- Farming just stopped → restore treadmill if toggle is still on
-                if TreadmillEnabled then
-                    _G.YOKUDO_AFKSystem.Enable()
-                    print("[YOKUDO] Treadmill restored (farming stopped)")
-                end
-            end
-        end
-
-        wasFarming = isFarming
     end
 end)
 
