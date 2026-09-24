@@ -132,9 +132,12 @@ local function MainLoop()
                 _G.YOKUDO_AttackDrone.Stop()
             end
 
-            if _G.YOKUDO_AFKSystem and not _G.YOKUDO_AFKSystem.IsEnabled() then
-                print("[ManagerDrone] Event Not Active → AFK System")
-                _G.YOKUDO_AFKSystem.Enable()
+            -- ✅ Only restore AFK if user has Auto Treadmill enabled
+            if _G.YOKUDO_AutoTreadmill and _G.YOKUDO_AutoTreadmill.IsEnabled() then
+                if _G.YOKUDO_AFKSystem and not _G.YOKUDO_AFKSystem.IsEnabled() then
+                    print("[ManagerDrone] Event Not Active → AFK System (AutoTreadmill ON)")
+                    _G.YOKUDO_AFKSystem.Enable()
+                end
             end
         elseif EventStopAttack then
             if _G.YOKUDO_AttackDrone and _G.YOKUDO_AttackDrone.IsEnabled() then
@@ -142,8 +145,11 @@ local function MainLoop()
                 _G.YOKUDO_AttackDrone.Stop()
             end
 
-            if _G.YOKUDO_AFKSystem and not _G.YOKUDO_AFKSystem.IsEnabled() then
-                _G.YOKUDO_AFKSystem.Enable()
+            -- ✅ Only restore AFK if user has Auto Treadmill enabled
+            if _G.YOKUDO_AutoTreadmill and _G.YOKUDO_AutoTreadmill.IsEnabled() then
+                if _G.YOKUDO_AFKSystem and not _G.YOKUDO_AFKSystem.IsEnabled() then
+                    _G.YOKUDO_AFKSystem.Enable()
+                end
             end
         elseif EventActive then
             if _G.YOKUDO_AFKSystem and _G.YOKUDO_AFKSystem.IsEnabled() then
