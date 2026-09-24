@@ -104,37 +104,38 @@ end
 -- activity stops  → restore treadmill (if we paused it)
 -- ==================================================
 task.spawn(function()
-    -- Start with real current state to avoid false trigger on load
     local WasActive = IsAnyActivityRunning()
 
     while task.wait(0.5) do
-        -- Keep WasActive current when the setting is off
+        -- Keep WasActive current when the feature is off
+        -- so there's no false-trigger when the user turns it on
         if not DisableWhenFarming then
             WasActive = IsAnyActivityRunning()
-        else
-            local IsActive = IsAnyActivityRunning()
+            continue
+        end
 
-            -- Activity just STARTED
-            if IsActive and not WasActive then
-                if TreadmillEnabled and _G.YOKUDO_AFKSystem and _G.YOKUDO_AFKSystem.IsEnabled() then
-                    StopTreadmill()
-                    PausedByActivity = true
-                    NotifyPause()
-                    print("[AutoTreadmill] Paused — farm/drone started")
-                end
+        local IsActive = IsAnyActivityRunning()
 
-            -- Activity just STOPPED
-            elseif not IsActive and WasActive then
-                if TreadmillEnabled and PausedByActivity then
-                    PausedByActivity = false
-                    StartTreadmill()
-                    NotifyRestore()
-                    print("[AutoTreadmill] Restored — farm/drone stopped")
-                end
+        -- Activity just STARTED
+        if IsActive and not WasActive then
+            if TreadmillEnabled and _G.YOKUDO_AFKSystem and _G.YOKUDO_AFKSystem.IsEnabled() then
+                StopTreadmill()
+                PausedByActivity = true
+                NotifyPause()
+                print("[AutoTreadmill] Paused — farm/drone started")
             end
 
-            WasActive = IsActive
+        -- Activity just STOPPED
+        elseif not IsActive and WasActive then
+            if TreadmillEnabled and PausedByActivity then
+                PausedByActivity = false
+                StartTreadmill()
+                NotifyRestore()
+                print("[AutoTreadmill] Restored — farm/drone stopped")
+            end
         end
+
+        WasActive = IsActive
     end
 end)
 
@@ -160,11 +161,12 @@ if _G.YOKUDO_CharacterSystem then
         IsEnabled = IsEnabled,
         OnCharacterAdded = function(Char, Hum, Root)
             -- AFKSystem has its own OnCharacterAdded that restarts
-            -- its distance-check loop. Wait 2s so it finishes
+            -- its distance-check loop. We wait 2s so it finishes
             -- its own restart before we check whether to re-enable.
             if TreadmillEnabled and not PausedByActivity then
                 task.wait(2)
                 pcall(function()
+                    -- Only call Enable if AFKSystem didn't restart on its own
                     if _G.YOKUDO_AFKSystem and not _G.YOKUDO_AFKSystem.IsEnabled() then
                         StartTreadmill()
                     end
