@@ -102,31 +102,30 @@ task.spawn(function()
     while task.wait(0.5) do
         if not DisableWhenFarming then
             WasActive = IsAnyActivityRunning()
-            continue
-        end
+        else
+            local IsActive = IsAnyActivityRunning()
 
-        local IsActive = IsAnyActivityRunning()
+            if IsActive and not WasActive then
+                -- Activity just started
+                if TreadmillEnabled and _G.YOKUDO_AFKSystem and _G.YOKUDO_AFKSystem.IsEnabled() then
+                    StopTreadmill()
+                    PausedByActivity = true
+                    NotifyPause()
+                    print("[AutoTreadmill] Treadmill paused (farm/drone started)")
+                end
 
-        if IsActive and not WasActive then
-            -- Activity just started
-            if TreadmillEnabled and _G.YOKUDO_AFKSystem and _G.YOKUDO_AFKSystem.IsEnabled() then
-                StopTreadmill()
-                PausedByActivity = true
-                NotifyPause()
-                print("[AutoTreadmill] Treadmill paused (farm/drone started)")
+            elseif not IsActive and WasActive then
+                -- Activity just stopped
+                if TreadmillEnabled and PausedByActivity then
+                    PausedByActivity = false
+                    StartTreadmill()
+                    NotifyRestore()
+                    print("[AutoTreadmill] Treadmill restored (farm/drone stopped)")
+                end
             end
 
-        elseif not IsActive and WasActive then
-            -- Activity just stopped
-            if TreadmillEnabled and PausedByActivity then
-                PausedByActivity = false
-                StartTreadmill()
-                NotifyRestore()
-                print("[AutoTreadmill] Treadmill restored (farm/drone stopped)")
-            end
+            WasActive = IsActive
         end
-
-        WasActive = IsActive
     end
 end)
 
