@@ -213,8 +213,8 @@ Loading.Update(48)
 loadstring(GetScript("Features/AFKSystem.lua"))()
 
 Loading.Update(49)
-loadstring(GetScript("Features/AutoTreadmill.lua"))()
-
+--loadstring(GetScript("Features/AutoTreadmill.lua"))()
+loadstring(GetScript("Features/TREADMILL.lua"))()
 -- ✅ VIPTP (AFK Farm Only) — ជំនួស EggCheckPremium
 Loading.Update(50)
 loadstring(GetScript("Features/VIPTP.lua"))()
@@ -223,7 +223,8 @@ Loading.Update(51)
 loadstring(GetScript("Features/AttackDrone.lua"))()
 
 Loading.Update(54)
-loadstring(GetScript("Features/ManagerDrone.lua"))()
+--loadstring(GetScript("Features/ManagerDrone.lua"))()
+loadstring(GetScript("Features/DRONE.lua"))()
 
 Loading.Update(57)
 loadstring(GetScript("Features/ManualFastClick.lua"))()
@@ -243,8 +244,8 @@ Loading.Update(62)
 loadstring(GetScript("Tabs/Info.lua"))()
 
 Loading.Update(65)
-loadstring(GetScript("Tabs/Farming.lua"))()
-
+--loadstring(GetScript("Tabs/Farming.lua"))()
+loadstring(GetScript("Tabs/FARMING.lua"))()
 Loading.Update(70)
 loadstring(GetScript("Tabs/Combat.lua"))()
 
